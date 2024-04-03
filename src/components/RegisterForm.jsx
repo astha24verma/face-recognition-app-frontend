@@ -4,7 +4,6 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
 const RegisterForm = ({ handleRegistration }) => {
-  console.log("RegisterForm.jsx");
   const [username, setUsername] = useState('');
 
   const handleSubmit = (e) => {

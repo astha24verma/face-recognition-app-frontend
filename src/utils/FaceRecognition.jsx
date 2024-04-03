@@ -8,8 +8,8 @@ import LoginForm from '../components/LoginForm';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 
-// const baseURI = 'http://localhost:5000';
-const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
+const baseURI = 'http://localhost:5000';
+// const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
 
 
 export const loadModels = async () => {
@@ -224,7 +224,7 @@ export const FaceRecognition = ({ setUser }) => {
         Cookies.set('token', token, { expires: 7 });
         console.log("logged in successfully");
         setUser(response.data.user);
-        isLoggedIn(true);
+        setIsLoggedIn(true);
         return response.data.user;
       } else {
         alert("Face Not Matched, Register first");
@@ -233,10 +233,12 @@ export const FaceRecognition = ({ setUser }) => {
       }
     } catch (error) {
       console.error('Error logging in:', error);
+      setShowSuccessAlertLogin(false);
+      setShowErrorAlertLogin(true);
+      setShow(true);
     } finally {
       restartWebcam();
     }
-
   };
 
   return (
@@ -252,42 +254,49 @@ export const FaceRecognition = ({ setUser }) => {
       </div>
 
       {showSuccessAlert && (
-        <Alert variant="success" onClose={() => setShow(false)} dismissible>
-          <Alert.Heading>You're Registered</Alert.Heading>
-        </Alert>
+        <div className="d-flex justify-content-center align-items-center">
+          <Alert className="w-75" variant="success" onClose={() => setShow(false)} dismissible>
+            <Alert.Heading>You're Registered</Alert.Heading>
+          </Alert>
+        </div>
 
       )}
       {showErrorAlert && (
-        <Alert variant="danger" onClose={() => setShow(false)} dismissible>
-          <Alert.Heading>Registration Failed</Alert.Heading>
-          <p>Try again with your face centered.</p>
-        </Alert>
+        <div className="d-flex justify-content-center align-items-center">
+          <Alert className="w-75" variant="danger" onClose={() => setShow(false)} dismissible>
+            <Alert.Heading>Registration Failed</Alert.Heading>
+            <p>Try again with your face centered.</p>
+          </Alert>
+        </div>
       )}
 
       {showErrorAlertLogin && (
-        <Alert variant="danger" onClose={() => setShow(false)} dismissible>
-          <Alert.Heading>Login Failed</Alert.Heading>
-          <p>Try again with your face centered.</p>
-        </Alert>
+        <div className="d-flex justify-content-center align-items-center">
+          <Alert className="w-75" variant="danger" onClose={() => setShow(false)} dismissible>
+            <Alert.Heading>Login Failed</Alert.Heading>
+            <p>Try again with your face centered.</p>
+          </Alert>
+        </div>
       )}
 
       {
         isLoggedIn ? (
           <div>
             {showSuccessAlertLogin && (
-              <Alert variant="success" onClose={() => setShow(false)} dismissible>
-                <Alert.Heading>Success! You are now logged in</Alert.Heading>
-              </Alert>
-
+              <div className="d-flex justify-content-center align-items-center">
+                <Alert className="w-75" variant="success" onClose={() => setShow(false)} dismissible>
+                  <Alert.Heading>Success! You are now logged in</Alert.Heading>
+                </Alert>
+              </div>
             )}
-            <p className='mt-5 mb-2'>Welcome back!</p>
+            <p className='mt-3 mb-2'>Welcome back!</p>
             <Button className='mb-3' onClick={() => {
               Cookies.remove('token');
               setUser(null);
               setIsLoggedIn(false);
             }} variant="danger" size="sm">
               Logout
-            </Button>        
+            </Button>
           </div>
         ) :
           <div>
