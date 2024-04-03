@@ -8,8 +8,8 @@ import LoginForm from '../components/LoginForm';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 
-const baseURI = 'http://localhost:5000';
-// const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
+// const baseURI = 'http://localhost:5000';
+const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
 
 
 export const loadModels = async () => {
