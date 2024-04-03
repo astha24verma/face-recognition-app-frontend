@@ -26,3 +26,10 @@
   color: #9b3574;
 }
 
+.input-box{
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  border: 1px solid #d1bfca;
+}
+

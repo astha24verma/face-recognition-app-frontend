@@ -217,7 +217,7 @@ export const FaceRecognition = ({ setUser }) => {
         )}
       </div>
       <button className='btn' onClick={isWebcamActive ? captureImage : restartWebcam}>
-        {isWebcamActive ? 'Capture Image' : 'Start Webcam'}
+        {isWebcamActive ? 'Capture Image' : 'Retake Image'}
       </button>
       <LoginForm handleLoginClick={handleLoginClick} setUser={setUser} />
       <RegisterForm handleRegistration={handleRegistration} setUser={setUser}/>

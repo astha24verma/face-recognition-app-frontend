@@ -16,7 +16,7 @@ const RegisterForm = ({ handleRegistration }) => {
       <h3 className='text-hightlight'>Not a member?</h3>
       <p>Capture and enter username to register </p>
     <form onSubmit={handleSubmit} method='post' name='register'>
-      <input
+      <input className='input-box'
         type="text"
         placeholder="Enter username"
         value={username}
