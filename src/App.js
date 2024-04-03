@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import WebcamComponent from './components/WebcamComponent';
 import UserProfile from './components/UserProfile';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
@@ -9,12 +10,17 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className='App-name'>Face Recognition App</h1>
-      <WebcamComponent setUser={setUser} webcamRef={webcamRef} />
-      {/* <LoginForm setUser={setUser} /> */}
-      <br />
+      <div class="container h-100">
+        <div class="row h-100 justify-content-center align-items-center">
 
+          <h2 className='text-center mb-3'>Face Recognition App</h2>
+          <WebcamComponent className='text-center' setUser={setUser} webcamRef={webcamRef} />
+          {/* <LoginForm setUser={setUser} /> */}
+          <br />
+
+        </div>
       </div>
+    </div>
   );
 }
 

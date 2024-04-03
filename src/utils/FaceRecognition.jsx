@@ -5,9 +5,11 @@ import * as faceapi from 'face-api.js';
 import axios from 'axios';
 import RegisterForm from '../components/RegisterForm';
 import LoginForm from '../components/LoginForm';
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
 
-// const baseURI = 'http://localhost:5000';
-const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
+const baseURI = 'http://localhost:5000';
+// const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
 
 
 export const loadModels = async () => {
@@ -52,7 +54,13 @@ export const FaceRecognition = ({ setUser }) => {
   // const [capturedImage, setCapturedImage] = useState(null);       // for captured image to display
   const [capturedImageData, setCapturedImageData] = useState(null);  // for captured image data to send to server
   const [isWebcamActive, setIsWebcamActive] = useState(true);
-  
+
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+
+  const [show, setShow] = useState(true);
+
+
   useEffect(() => {
     loadModels();
     const token = Cookies.get('token');
@@ -126,7 +134,7 @@ export const FaceRecognition = ({ setUser }) => {
                 } else {
                   console.error('Face descriptor is missing');
                 }
-              }else{
+              } else {
                 console.log("No image captured yet (FaceRecognition)");
               }
             } catch (error) {
@@ -158,12 +166,20 @@ export const FaceRecognition = ({ setUser }) => {
 
     console.log('Registering user... & descriptors => ' + descriptors + ' username => ' + username);
     try {
-      await axios.post(`${baseURI}/api/register`, { username, descriptors })
-        .then(response => {
-          alert("Registered successfully");
-          console.log(response.data); // Log response from server
-        });
-        restartWebcam();
+      const response = await axios.post(`${baseURI}/api/register`, { username, descriptors })
+      if (response.status === 201) {
+        // Registration successful
+        setShowSuccessAlert(true);
+        setShowErrorAlert(false);
+        setShow(true)
+        // Reset form fields or perform other actions
+      } else {
+        // Registration failed
+        setShowSuccessAlert(false);
+        setShowErrorAlert(true);
+        setShow(true);
+      }
+      restartWebcam();
     } catch (error) {
 
       console.error('Error registering user(faceRec):', error);
@@ -204,9 +220,8 @@ export const FaceRecognition = ({ setUser }) => {
     }
   };
 
-
   return (
-    <div>
+    <div className='text-center'>
       <div>
         {isWebcamActive ? (
           <Webcam ref={webcamRef} style={{ width: 640, height: 480 }} />
@@ -216,11 +231,23 @@ export const FaceRecognition = ({ setUser }) => {
           <div>No image captured</div>
         )}
       </div>
-      <button className='btn' onClick={isWebcamActive ? captureImage : restartWebcam}>
-        {isWebcamActive ? 'Capture Image' : 'Retake Image'}
-      </button>
+
+      {showSuccessAlert && (
+        <Alert variant="success" onClose={() => setShow(false)} dismissible>
+          <Alert.Heading>You're Registered</Alert.Heading>
+        </Alert>
+
+      )}
+      {showErrorAlert && (
+        <Alert variant="danger" onClose={() => setShow(false)} dismissible>
+          <Alert.Heading>Registration Failed</Alert.Heading>
+          <p>Try again with your face centered.</p>
+        </Alert>
+      )}
+
+      <Button onClick={isWebcamActive ? captureImage : restartWebcam} variant="danger" size="sm">{isWebcamActive ? 'Capture Image' : 'Retake Image'}</Button>{' '}
       <LoginForm handleLoginClick={handleLoginClick} setUser={setUser} />
-      <RegisterForm handleRegistration={handleRegistration} setUser={setUser}/>
+      <RegisterForm handleRegistration={handleRegistration} setUser={setUser} />
       {faceDetected && (
         <div>
           Face detected!

@@ -1,5 +1,6 @@
 // LoginForm.js
 import React, { useState } from 'react';
+import Button from 'react-bootstrap/Button';
 
 const LoginForm = ({ handleLoginClick, setUser }) => {
   const [loginMessage, setLoginMessage] = useState('');
@@ -19,10 +20,10 @@ const LoginForm = ({ handleLoginClick, setUser }) => {
   };
 
   return (
-    <div>
-      <p>Capture your face by keeping it center and click login</p>
+    <div className='mt-2 mb-3'>
+      <p>Capture your face and login</p>
       {loginMessage && <p>{setLoginMessage}</p>}
-      <button className='btn' onClick={handleLogin}>Login</button>
+      <Button variant="success" size='sm' onClick={handleLogin}>Login</Button>
     </div>
   );
 };

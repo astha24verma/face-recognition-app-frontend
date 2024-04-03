@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 const RegisterForm = ({ handleRegistration }) => {
   console.log("RegisterForm.jsx");
@@ -12,18 +15,22 @@ const RegisterForm = ({ handleRegistration }) => {
   };
 
   return (
-    <div>
+    <div className='text-center' >
       <h3 className='text-hightlight'>Not a member?</h3>
-      <p>Capture and enter username to register </p>
-    <form onSubmit={handleSubmit} method='post' name='register'>
-      <input className='input-box'
-        type="text"
-        placeholder="Enter username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <button className='btn' type="submit" name='submit'>Register</button>
-    </form>
+      <p>Capture your face and enter username to register </p>
+      <div className="d-flex justify-content-center mb-5">
+        <Form onSubmit={handleSubmit} method='post' name='register'>
+          <InputGroup >
+            <Form.Control type="text"
+              size="sm"
+              name="username"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)} />
+            <Button className="ms-2" variant="danger" size='sm' type="submit" name='submit'>Register</Button>
+          </InputGroup>
+        </Form>
+      </div>
     </div>
   );
 };
