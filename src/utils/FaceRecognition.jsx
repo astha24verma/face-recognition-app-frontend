@@ -55,9 +55,15 @@ export const FaceRecognition = ({ setUser }) => {
   const [capturedImageData, setCapturedImageData] = useState(null);  // for captured image data to send to server
   const [isWebcamActive, setIsWebcamActive] = useState(true);
 
+  // Register alert states
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
 
+  // Login alert states
+  const [showSuccessAlertLogin, setShowSuccessAlertLogin] = useState(false);
+  const [showErrorAlertLogin, setShowErrorAlertLogin] = useState(false);
+
+  // cross button of alert
   const [show, setShow] = useState(true);
 
 
@@ -172,6 +178,7 @@ export const FaceRecognition = ({ setUser }) => {
         setShowSuccessAlert(true);
         setShowErrorAlert(false);
         setShow(true)
+
         // Reset form fields or perform other actions
       } else {
         // Registration failed
@@ -198,16 +205,25 @@ export const FaceRecognition = ({ setUser }) => {
       }
       console.log(typeof (descriptors) + " type");
       const response = await axios.post(`${baseURI}/api/login`, { descriptors }).then(console.log("Trying to login.."));
+      if (response.status === 200) {
+        // Login successful
+        setShowSuccessAlertLogin(true);
+        setShowErrorAlertLogin(false);
+        setShow(true)
+        setIsLoggedIn(true);
+        // Reset form fields or perform other actions
+      } else {
+        // Login failed
+        setShowSuccessAlertLogin(false);
+        setShowErrorAlertLogin(true);
+        setShow(true);
+      }
       if (response.data.user) {
         // get the token from the response and store it in local storage
         const token = response.data.token;
         Cookies.set('token', token, { expires: 7 });
-
-        alert("Logged in successfully");
-
+        console.log("logged in successfully");
         setUser(response.data.user);
-        console.log("User logged in successfully - " + response.data.user);
-        restartWebcam();
         isLoggedIn(true);
         return response.data.user;
       } else {
@@ -217,12 +233,15 @@ export const FaceRecognition = ({ setUser }) => {
       }
     } catch (error) {
       console.error('Error logging in:', error);
+    } finally {
+      restartWebcam();
     }
+
   };
 
   return (
     <div className='text-center'>
-      <div>
+      <div className='mb-1'>
         {isWebcamActive ? (
           <Webcam ref={webcamRef} style={{ width: 640, height: 480 }} />
         ) : capturedImageData ? (
@@ -245,9 +264,42 @@ export const FaceRecognition = ({ setUser }) => {
         </Alert>
       )}
 
-      <Button onClick={isWebcamActive ? captureImage : restartWebcam} variant="danger" size="sm">{isWebcamActive ? 'Capture Image' : 'Retake Image'}</Button>{' '}
-      <LoginForm handleLoginClick={handleLoginClick} setUser={setUser} />
-      <RegisterForm handleRegistration={handleRegistration} setUser={setUser} />
+      {showErrorAlertLogin && (
+        <Alert variant="danger" onClose={() => setShow(false)} dismissible>
+          <Alert.Heading>Login Failed</Alert.Heading>
+          <p>Try again with your face centered.</p>
+        </Alert>
+      )}
+
+      {
+        isLoggedIn ? (
+          <div>
+            {showSuccessAlertLogin && (
+              <Alert variant="success" onClose={() => setShow(false)} dismissible>
+                <Alert.Heading>Success! You are now logged in</Alert.Heading>
+              </Alert>
+
+            )}
+            <p className='mt-5 mb-2'>Welcome back!</p>
+            <Button className='mb-3' onClick={() => {
+              Cookies.remove('token');
+              setUser(null);
+              setIsLoggedIn(false);
+            }} variant="danger" size="sm">
+              Logout
+            </Button>        
+          </div>
+        ) :
+          <div>
+            <Button onClick={isWebcamActive ? captureImage : restartWebcam} variant="danger" size="sm">
+              {isWebcamActive ? 'Capture Image' : 'Retake Image'}
+            </Button>{' '}
+
+            <LoginForm handleLoginClick={handleLoginClick} setUser={setUser} />
+            <RegisterForm handleRegistration={handleRegistration} setUser={setUser} />
+          </div>
+      }
+
       {faceDetected && (
         <div>
           Face detected!
@@ -261,6 +313,5 @@ export const FaceRecognition = ({ setUser }) => {
     </div>
   )
 };
-
 
 export default FaceRecognition;
