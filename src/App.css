@@ -9,4 +9,8 @@
   color: #de5b5b;
 }
 
+video, img {
+  transform: scaleX(-1);
+}
+
 
