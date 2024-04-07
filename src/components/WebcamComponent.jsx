@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
 import { FaceRecognition } from '../utils/FaceRecognition.jsx';
 
-const WebcamComponent = ({ setUser, webcamRef }) => {
+const WebcamComponent = ({ setUser }) => {
 
   return (
     <div>
-      <FaceRecognition setUser={setUser} webcamRef={webcamRef} />
+      <FaceRecognition setUser={setUser} />
     </div>
   );
 };

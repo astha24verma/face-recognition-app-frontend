@@ -11,7 +11,6 @@ import Button from 'react-bootstrap/Button';
 // const baseURI = 'http://localhost:5000';
 const baseURI = 'https://face-recognition-app-backend-re21.onrender.com';
 
-
 export const loadModels = async () => {
   // const MODEL_URL = process.env.PUBLIC_URL + '/models';
   await Promise.all([
@@ -30,7 +29,7 @@ export const captureFaceDescriptors = async (imageElement) => {
         .withFaceDescriptor();
 
       if (detections) {
-        console.log("detections =====> " + detections.descriptor);
+        console.log("detections => " + detections.descriptor);
         return detections.descriptor;
       } else {
         throw new Error('No face detected');
@@ -50,7 +49,10 @@ export const FaceRecognition = ({ setUser }) => {
   const [faceDetected, setFaceDetected] = useState(false);
   const [recognizedUser, setRecognizedUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const [isLoginInProgress, setIsLoginInProgress] = useState(false);
+  const [isRegisterInProgress, setIsRegisterInProgress] = useState(false);
+
   // const [capturedImage, setCapturedImage] = useState(null);       // for captured image to display
   const [capturedImageData, setCapturedImageData] = useState(null);  // for captured image data to send to server
   const [isWebcamActive, setIsWebcamActive] = useState(true);
@@ -58,6 +60,7 @@ export const FaceRecognition = ({ setUser }) => {
   // Register alert states
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [showAlreadyRegisteredAlert, setShowAlreadyRegisteredAlert] = useState(false);
 
   // Login alert states
   const [showSuccessAlertLogin, setShowSuccessAlertLogin] = useState(false);
@@ -79,7 +82,7 @@ export const FaceRecognition = ({ setUser }) => {
         const imageSrc = webcamRef.current.getScreenshot();
         if (imageSrc) {
           const base64Image = imageSrc.split(',')[1]; // Extract base64 data from the data URL
-          console.log("base64Image ==> " + base64Image);
+          console.log("base64Image => " + base64Image);
           setCapturedImageData(base64Image);
           setIsWebcamActive(false); // Stop the webcam
           resolve(base64Image);
@@ -98,18 +101,12 @@ export const FaceRecognition = ({ setUser }) => {
   };
 
   const detectFace = async (type) => {
-    console.log("isLoginInProgress => " + isLoginInProgress);
-    if (isLoginInProgress) return;
     if (capturedImageData) {
-      setIsLoginInProgress(true); // Set login in progress
       const imageElement = new Image();
       imageElement.src = `data:image/jpeg;base64,${capturedImageData}`;
 
       const descriptor = await captureFaceDescriptors(imageElement);
-      console.log("descriptor :::> " + descriptor);
       const descriptors = [];
-      console.log('type of descriptors :(detect face) ' + typeof (descriptors));
-      console.log("descriptors :::> " + descriptors);
       descriptors.push(descriptor);
       console.log("capturedImgage => " + imageElement.src + " \n descriptors => " + descriptors);
       if (descriptors === undefined) return;
@@ -151,12 +148,12 @@ export const FaceRecognition = ({ setUser }) => {
           console.log("No face detected");
           setFaceDetected(false);
           setRecognizedUser(null);
+          setIsLoginInProgress(false);
         }
 
       } else {
         console.log("descriptor is null");
       }
-      setIsLoginInProgress(false); // Reset login in progress after completion
     } else {
       console.log("No image captured yet");
     }
@@ -164,36 +161,45 @@ export const FaceRecognition = ({ setUser }) => {
 
   const handleRegistration = async (username) => {
     localStorage.setItem('username', username);
+    setIsRegisterInProgress(true); // Set registration in progress
     await detectFace("register");
   }
 
   const registerUser = async (username, descriptors) => {
-    console.log('is array : ' + Array.isArray(descriptors));
-
-    console.log('Registering user... & descriptors => ' + descriptors + ' username => ' + username);
     try {
       const response = await axios.post(`${baseURI}/api/register`, { username, descriptors })
       if (response.status === 201) {
         // Registration successful
         setShowSuccessAlert(true);
         setShowErrorAlert(false);
+        setShowAlreadyRegisteredAlert(false);
         setShow(true)
 
         // Reset form fields or perform other actions
-      } else {
+      } else if (response.status === 200) {
+        // Username already exists
+        setShowSuccessAlert(false);
+        setShowErrorAlert(false);
+        setShowAlreadyRegisteredAlert(true);
+        setShow(true);
+      }
+      else {
         // Registration failed
         setShowSuccessAlert(false);
         setShowErrorAlert(true);
+        setShowAlreadyRegisteredAlert(false);
         setShow(true);
       }
       restartWebcam();
     } catch (error) {
-
       console.error('Error registering user(faceRec):', error);
+    } finally {
+      setIsRegisterInProgress(false); // Set registration in progress to false
     }
   };
 
   const handleLoginClick = async () => {
+    setIsLoginInProgress(true); // Set login in progress
     await detectFace("login");
   };
 
@@ -203,8 +209,7 @@ export const FaceRecognition = ({ setUser }) => {
         console.error('No face detected');
         return;
       }
-      console.log(typeof (descriptors) + " type");
-      const response = await axios.post(`${baseURI}/api/login`, { descriptors }).then(console.log("Trying to login.."));
+      const response = await axios.post(`${baseURI}/api/login`, { descriptors }).then('trying to login ...');
       if (response.status === 200) {
         // Login successful
         setShowSuccessAlertLogin(true);
@@ -222,8 +227,9 @@ export const FaceRecognition = ({ setUser }) => {
         // get the token from the response and store it in local storage
         const token = response.data.token;
         Cookies.set('token', token, { expires: 7 });
-        console.log("logged in successfully");
+        console.log("Logged in successfully");
         setUser(response.data.user);
+        console.log("User => " + response.data.user);
         setIsLoggedIn(true);
         return response.data.user;
       } else {
@@ -238,6 +244,7 @@ export const FaceRecognition = ({ setUser }) => {
       setShow(true);
     } finally {
       restartWebcam();
+      setIsLoginInProgress(false); // Set login in progress to false
     }
   };
 
@@ -256,7 +263,7 @@ export const FaceRecognition = ({ setUser }) => {
       {showSuccessAlert && (
         <div className="d-flex justify-content-center align-items-center">
           <Alert className="w-75" variant="success" onClose={() => setShow(false)} dismissible>
-            <Alert.Heading>You're Registered</Alert.Heading>
+            <Alert.Heading>Registration Successful</Alert.Heading>
           </Alert>
         </div>
 
@@ -275,6 +282,14 @@ export const FaceRecognition = ({ setUser }) => {
           <Alert className="w-75" variant="danger" onClose={() => setShow(false)} dismissible>
             <Alert.Heading>Login Failed</Alert.Heading>
             <p>Try again with your face centered.</p>
+          </Alert>
+        </div>
+      )}
+
+      {showAlreadyRegisteredAlert && (
+        <div className="d-flex justify-content-center align-items-center">
+          <Alert className="w-75" variant="warning" onClose={() => setShow(false)} dismissible>
+            <Alert.Heading>Username already exists</Alert.Heading>
           </Alert>
         </div>
       )}
@@ -304,8 +319,8 @@ export const FaceRecognition = ({ setUser }) => {
               {isWebcamActive ? 'Capture Image' : 'Retake Image'}
             </Button>{' '}
 
-            <LoginForm handleLoginClick={handleLoginClick} setUser={setUser} />
-            <RegisterForm handleRegistration={handleRegistration} setUser={setUser} />
+            <LoginForm handleLoginClick={handleLoginClick} setUser={setUser}  isLoginInProgress={isLoginInProgress} />
+            <RegisterForm handleRegistration={handleRegistration} setUser={setUser} isRegisterInProgress={isRegisterInProgress} />
           </div>
       }
 

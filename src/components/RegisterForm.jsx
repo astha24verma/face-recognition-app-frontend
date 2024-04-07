@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Spinner from 'react-bootstrap/Spinner';
 
-const RegisterForm = ({ handleRegistration }) => {
+const RegisterForm = ({ handleRegistration, isRegisterInProgress }) => {
   const [username, setUsername] = useState('');
 
   const handleSubmit = (e) => {
@@ -26,7 +27,11 @@ const RegisterForm = ({ handleRegistration }) => {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)} />
-            <Button className="ms-2" variant="danger" size='sm' type="submit" name='submit'>Register</Button>
+            {
+              isRegisterInProgress ?
+                (<span><Spinner animation="grow" variant="dark" /></span>) :
+                (<Button className="ms-2" variant="danger" size='sm' type="submit" name='submit' disabled={isRegisterInProgress}>Register</Button>)
+            }
           </InputGroup>
         </Form>
       </div>

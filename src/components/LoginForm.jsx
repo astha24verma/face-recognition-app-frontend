@@ -1,16 +1,16 @@
-// LoginForm.js
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
 
-const LoginForm = ({ handleLoginClick, setUser }) => {
+const LoginForm = ({ handleLoginClick, setUser, user, isLoginInProgress }) => {
   const [loginMessage, setLoginMessage] = useState('');
 
   const handleLogin = async () => {
     try {
-      const user = await handleLoginClick();
-      if (user) {
-        setUser(user);
-        setLoginMessage('Login successful. Welcome ' + user + '!')
+      const username = await handleLoginClick();
+      if (username) {
+        setUser(username);
+        setLoginMessage('Login successful. Welcome ' + username + '!')
       } else {
         setLoginMessage('User not recognized. Please try again or register.');
       }
@@ -20,11 +20,20 @@ const LoginForm = ({ handleLoginClick, setUser }) => {
   };
 
   return (
+    <>
     <div className='mt-2 mb-3'>
       <p>Capture your face and login</p>
       {loginMessage && <p>{setLoginMessage}</p>}
-      <Button variant="success" size='sm' onClick={handleLogin}>Login</Button>
+      
+      {
+      isLoginInProgress ? 
+      (<Spinner animation="grow" variant="dark" />) : 
+      (<Button variant="success" size='sm' onClick={handleLogin} disabled={isLoginInProgress}> Login  </Button>)
+      }      
+      
     </div>
+    </>
+
   );
 };
 
